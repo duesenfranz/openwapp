@@ -35,7 +35,7 @@ define([
       'submit #register-conf':    'register',
       'click button':             'goToValidate',
       'click .btn-back':          'back',
-      'change select':            'setCountryPrefix',
+      'change #country-select':            'setCountryPrefix',
       'click  legend':            'showSelect',
       'click  .tos a':            'showTOS'
     },
@@ -138,7 +138,7 @@ define([
     },
 
     showSelect: function () {
-      var $select = this.$el.find('select');
+      var $select = this.$el.find('#country-select');
       $select.focus();
     },
 
@@ -152,7 +152,7 @@ define([
 
     gotoConfirmation: function (evt) {
       evt.preventDefault();
-      var countryCode = $(evt.target).find('select').val();
+      var countryCode = $(evt.target).find('#country-select').val();
       var phoneParts = this._getPhoneParts();
 
       var isValid = this._checkPhoneNumber(phoneParts, countryCode);
@@ -181,7 +181,7 @@ define([
 
     _getPhoneParts: function (pageId) {
       pageId = pageId || '#login-page';
-      var code = this.$el.find('select').val();
+      var code = this.$el.find('#country-select').val();
       var country = this.countryTables.findWhere({ code: code });
       var prefix = country.get('prefix').substr(1);
       var number = this.$el.find(pageId + ' input[name=msisdn]').val();
@@ -240,7 +240,7 @@ define([
       // we should also for this check to work
       country = country.toUpperCase();
       if (!international || country !== international.region) {
-        var countrySelect = this.$el.find('select')[0];
+        var countrySelect = this.$el.find('#country-select')[0];
         var countryName =
           countrySelect.options[countrySelect.selectedIndex].textContent;
         var message =
