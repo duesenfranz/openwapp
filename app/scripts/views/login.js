@@ -23,6 +23,9 @@ define([
     initialize: function () {
       this.mcc = 0;
       this.mnc = 0;
+      this.possibleMccMncs = []; //only relevant if multiple sims found
+      this.proposedCountry = null;
+      console.log("K");
       this.getMccAndMnc();
       this.countryTables = new CountriesCollection();
     },
@@ -69,46 +72,55 @@ define([
     },
 
     getMccAndMnc: function () {
-      var mozCnx, network;
-      var stringId;
-      var multiSIMdetected = false;
-      var _this = this;
-      var l10n = global.localisation[global.language];
-      // Firefox OS 1.1-
-      if ((mozCnx = navigator.mozMobileConnection)) {
-        network = (mozCnx.lastKnownHomeNetwork || mozCnx.lastKnownNetwork ||
-          '-').split('-');
-        this.mcc = parseInt(network[0], 10);
-        this.mnc = parseInt(network[1], 10);
+      var SimCardList = (
+          // < 1.3
+          (navigator.mozMobileConnection && [navigator.mozMobileConnection]) ||
+            // >= 1.3
+          navigator.mozMobileConnections ||
+            // simulator
+          []
+        ),
+        MccMncList = SimCardList.
+        map(function(sim) {
+          return (sim.lastKnownHomeNetwork ||
+          sim.lastKnownNetwork || '').
+            split('-').
+            map(function(i){parseInt(i, 10);});
+        }).
+        filter(function(arr) {
+          return arr.length === 2;
+        });
+      if (MccMncList.length === 1) {
+        console.log('Single sim card found', MccMncList[0]);
+        this.mcc = MccMncList[0][0];
+        this.mnc = MccMncList[0][1];
+      } else if (MccMncList.length > 1) {
+        console.log('Multiple usable sim cards found', MccMncList);
+        this.possibleMccMncs = MccMncList;
+        this.populateSimCards();
+      } else {
+        console.warn('No usable sim card found');
       }
-      // Firefox OS 1.2+
-      else if ((mozCnx = navigator.mozMobileConnections)) {
-        if (navigator.mozMobileConnections.length > 1) {
-          multiSIMdetected = true;
-        }
-        for (var c = 0; c < navigator.mozMobileConnections.length; c++) {
-          network = (mozCnx[c].lastKnownHomeNetwork ||
-            mozCnx.lastKnownNetwork || '-').split('-');
-          _this.mcc = _this.mcc || parseInt(network[0], 10);
-          _this.mnc = _this.mnc || parseInt(network[1], 10);
-        }
-      }
-      // Desktop or simulator
-      else {
-        console.log('mozMobileConnection not available');
-        stringId = 'simRequired';
-        window.alert(l10n[stringId]);
-      }
+    },
 
-      if (multiSIMdetected) {
-        stringId = 'multiSIMdetectedWarn';
-        window.alert(l10n[stringId]);
-      }
+    populateSimCards: function () {
+      var _this = this,
+        $select = this.$el.find('#sim-select');
+      this.possibleMccMncs.map(function(mccMnc, index) {
+        var mcc = mccMnc[0],
+          country = _this.countryTables.getCountryByMCC(mcc);
+        $select.append(new Option(index + ': ' + country.toString(), index));
+      });
+    },
 
-      if (isNaN(this.mcc)) {
-        stringId = 'simRequired';
-        window.alert(l10n[stringId]);
-      }
+    setSimCard: function(evt) {
+      var simNumber = $(evt.target).val(),
+        mccMnc = this.possibleMccMncs[simNumber],
+        $countrySelect = this.$el.find('#country-select'),
+        country = this.countryTables.getCountryByMCC(mccMnc[0]);
+      this.mcc = mccMnc[0];
+      this.mnc = mccMnc[1];
+      $countrySelect.val(country.get('code'));
     },
 
     populateCountryNames: function () {
@@ -120,6 +132,7 @@ define([
           true, is_sim));
         if (is_sim) {
           _this.$el.find('legend').html(country.get('prefix'));
+          _this.proposedCountry = country;
         }
       });
     },
@@ -134,6 +147,7 @@ define([
       var country = this.countryTables
           .getSelectedCountry($(evt.target).val());
       this.$el.find('legend').html(country.get('prefix'));
+      this.proposedCountry = country;
     },
 
     gotoConfirmation: function (evt) {
@@ -145,7 +159,11 @@ define([
       if (!isValid) {
         return;
       }
-
+      while (!this.proposedCountry.hasMccMnc(this.mcc, this.mnc)) {
+        // TODO: placeholder code.
+        this.mcc = window.prompt('Please enter your mcc');
+        this.mnc = window.prompt('Please enter your mnc');
+      }
       var $confirmationForm = this.$el.find('#register-conf');
       $confirmationForm.find('input[name=msisdn]').val(phoneParts.number);
       this.next('confirmation');

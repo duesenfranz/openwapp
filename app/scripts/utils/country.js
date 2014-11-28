@@ -9,7 +9,8 @@ define([
         mccMncNetworkList: [],
         code: '',
         name: '',
-        prefix: ''
+        prefix: '',
+        mncList: []
       };
     },
 
@@ -18,7 +19,11 @@ define([
     },
 
     hasMccMnc: function(mcc, mnc) {
-      return this.mccMncNetworkList.filter(function(mccMncNetwork) {
+      if (this.get('mccMncNetworkList') === undefined) {
+        console.log(this);
+        return false
+      }
+      return this.get('mccMncNetworkList').filter(function(mccMncNetwork) {
         return mcc === mccMncNetwork[0] && mnc === mccMncNetwork[1]
       }).length > 0
     }

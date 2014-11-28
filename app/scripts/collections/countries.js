@@ -42,10 +42,13 @@ define([
         }
 
         parsed.map(function(country) {
+          if (country.mccMncNetworkList === undefined) {
+            throw Error("wtf");
+          }
           _this.add(new Country({
             mccMncNetworkList: country.mccMncNetworkList,
             code: country.code,
-            name: country.name,
+            name: country.full,
             prefix: country.prefix
           }))
         });
@@ -66,6 +69,7 @@ define([
     },
 
     getCountryByMccMnc: function (mcc, mnc) {
+      console.log("wow");
       //TODO: slow! maybe make a hashmap of concentated mcc and mnc
       return this.find(function (model) {
         return model.hasMccMnc(mcc, mnc);
