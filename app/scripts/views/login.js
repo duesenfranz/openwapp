@@ -35,7 +35,8 @@ define([
       'submit #register-conf':    'register',
       'click button':             'goToValidate',
       'click .btn-back':          'back',
-      'change #country-select':            'setCountryPrefix',
+      'change #country-select':   'setCountryPrefix',
+      'change #sim-select'        'setSimCard',
       'click  legend':            'showSelect',
       'click  .tos a':            'showTOS'
     },
@@ -111,6 +112,7 @@ define([
           country = _this.countryTables.getCountryByMCC(mcc);
         $select.append(new Option(index + ': ' + country.toString(), index));
       });
+      $select.removeClass('hidden');
     },
 
     setSimCard: function(evt) {
