@@ -47,7 +47,7 @@ define([
         var _this = this;
 
         // No country found
-        if (this.mcc === 0 || isNaN(this.mcc)) {
+        if (this.mcc === ''|| this.mnc === '') {
           stringId = 'countryNotDetectedOnLogin';
           message = l10n[stringId];
         }
@@ -56,7 +56,7 @@ define([
           var interpolate = global.l10nUtils.interpolate;
           stringId = 'countryDetectedOnLogin';
           message = interpolate(l10n[stringId], {
-            country: this.countryTables.getCountryByMCC(_this.mcc)
+            country: this.countryTables.getCountryByMccMnc(_this.mcc, _this.mnc)
           });
         }
         var el = this.template({
@@ -112,24 +112,16 @@ define([
     },
 
     populateCountryNames: function () {
-      var _this = this;
-      var $select = this.$el.find('#register select');
-      $select.html('');
-      var added = {};
+      var _this = this,
+        $select = this.$el.find('#register select').html('');
       this.countryTables.forEach(function (country) {
-        if (!added[country.get('code')]) {
-          $select.append(new Option(country.toString(), country.get('code'),
-            true, (_this.mcc === country.get('mcc'))));
-          added[country.get('code')] = true;
+        var is_sim = country.hasMccMnc(_this.mcc, _this.mnc);
+        $select.append(new Option(country.toString(), country.get('code'),
+          true, is_sim));
+        if (is_sim) {
+          _this.$el.find('legend').html(country.get('prefix'));
         }
       });
-
-      if (this.mcc === 0 || isNaN(this.mcc)) {
-        return;
-      }
-
-      var country = this.countryTables.getSelectedCountry($('select').val());
-      this.$el.find('legend').html(country.get('prefix'));
     },
 
     showSelect: function () {
