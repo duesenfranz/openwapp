@@ -36,7 +36,7 @@ define([
       'click button':             'goToValidate',
       'click .btn-back':          'back',
       'change #country-select':   'setCountryPrefix',
-      'change #sim-select'        'setSimCard',
+      'change #sim-select' :      'setSimCard',
       'click  legend':            'showSelect',
       'click  .tos a':            'showTOS'
     },
