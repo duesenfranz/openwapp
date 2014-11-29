@@ -62,7 +62,8 @@ define([
           var interpolate = global.l10nUtils.interpolate;
           stringId = 'countryDetectedOnLogin';
           message = interpolate(l10n[stringId], {
-            country: this.countryTables.getCountryByMccMnc(_this.mcc, _this.mnc)
+            country: this.countryTables.getCountryByMccMnc(
+              this.selectedSimCard.mcc, this.selectedSimCard.mnc)
           });
         } else {
           stringId = 'multipleSimCards';
