@@ -27,8 +27,8 @@ define([
       this.possibleSimCards = []; //only relevant if multiple sims found
       this.selectedSimCard = null;
       this.proposedCountry = null;
-      this.getMccAndMnc();
       this.countryTables = new CountriesCollection();
+      this.getMccAndMnc();
     },
 
     events: {
@@ -54,25 +54,26 @@ define([
         var l10n = global.localisation[global.language];
         var _this = this;
 
-        // No country found
-        if (this.mcc === ''|| this.mnc === '') {
-          console.log(this);
+        if (this.possibleSimCards.length === 0) {
           stringId = 'countryNotDetectedOnLogin';
           message = l10n[stringId];
         }
-        // Country found, show a proper message
-        else {
+        else if (this.possibleSimCards.length === 1) {
           var interpolate = global.l10nUtils.interpolate;
           stringId = 'countryDetectedOnLogin';
           message = interpolate(l10n[stringId], {
             country: this.countryTables.getCountryByMccMnc(_this.mcc, _this.mnc)
           });
+        } else {
+          stringId = 'multipleSimCards';
+          message = l10n[stringId];
         }
         console.log(message);
         var el = this.template({
           countryDetectionMessage: message
         });
         this.$el.html(el);
+        this.possibleSimCards.length > 1 && this.populateSimCards();
         this.populateCountryNames();
         this.$el.removeClass().addClass('page init');
       }
@@ -105,10 +106,10 @@ define([
       if (possibleSimCards.length === 1) {
         console.log('Single sim card found', possibleSimCards[0]);
         this.selectedSimCard = possibleSimCards[0];
+        this.possibleSimCards = possibleSimCards;
       } else if (possibleSimCards.length > 1) {
         console.log('Multiple usable sim cards found', possibleSimCards);
         this.possibleSimCards = possibleSimCards;
-        this.populateSimCards();
       } else {
         console.warn('No usable sim card found');
       }
@@ -117,6 +118,7 @@ define([
     populateSimCards: function () {
       var _this = this,
         $select = this.$el.find('#sim-select');
+      console.log("select", $select.length);
       this.possibleSimCards.map(function(sim) {
         var country = _this.countryTables.getCountryByMccMnc(sim.mcc, sim.mnc),
           carrier = country.getCarrier(sim.mcc, sim.mnc);
@@ -124,14 +126,17 @@ define([
           'Slot ' + sim.index + ': ' + carrier, sim.index
         ));
       });
+      console.log("select", $select.length);
+      this.selectedSimCard = this.possibleSimCards[$select.val()];
       $select.removeClass('hidden');
     },
 
     setSimCard: function(evt) {
       var simNumber = $(evt.target).val(),
-        simCard = this.possibleMccMncs[simNumber],
+        simCard = this.possibleSimCards[simNumber],
         $countrySelect = this.$el.find('#country-select'),
-        country = this.countryTables.getCountryByMCC(simCard.mcc, simCard.mnc);
+        country = this.countryTables.getCountryByMccMnc(
+          simCard.mcc, simCard.mnc);
       this.selectedSimCard = simCard;
       $countrySelect.val(country.get('code'));
     },
@@ -182,7 +187,7 @@ define([
 
     populateCountryNames: function () {
       var _this = this,
-        $select = this.$el.find('#register select').html('');
+        $select = this.$el.find('#country-select').html('');
       this.countryTables.forEach(function (country) {
         var isSim = _this.selectedSimCard && country.hasMccMnc(
           _this.selectedSimCard.mcc, _this.selectedSimCard.mnc
@@ -225,6 +230,8 @@ define([
           this.selectedSimCard.mcc, this.selectedSimCard.mnc)) {
         this.mcc = this.selectedSimCard.mcc;
         this.mnc = this.selectedSimCard.mnc;
+        console.log('mcc', this.mcc);
+        console.log('mnc', this.mnc);
         this.next('confirmation');
       } else {
         this.populateNetworkNames();
