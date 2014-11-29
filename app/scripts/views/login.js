@@ -25,22 +25,22 @@ define([
       this.mnc = '';
       this.possibleMccMncs = []; //only relevant if multiple sims found
       this.proposedCountry = null;
-      console.log("K");
       this.getMccAndMnc();
       this.countryTables = new CountriesCollection();
     },
 
     events: {
-      'submit #register':         'gotoConfirmation',
-      'submit #register-conf':    'register',
-      'submit #register-network': 'networkSelected',
-      'click button':             'goToValidate',
-      'click .btn-back':          'back',
-      'change #country-select':   'setCountryPrefix',
-      'change #sim-select' :      'setSimCard',
-      'change #network-select':   'setNetwork',
-      'click  legend':            'showSelect',
-      'click  .tos a':            'showTOS'
+      'submit #register':            'gotoConfirmation',
+      'submit #register-conf':       'register',
+      'submit #register-network':    'networkSelected',
+      'click button':                'goToValidate',
+      'click .btn-back':             'back',
+      'change #country-select':      'setCountryPrefix',
+      'change #sim-select' :         'setSimCard',
+      'change #network-name-select': 'setNetworkName',
+      'change #mcc-mnc-select':      'setNetwork',
+      'click  legend':               'showSelect',
+      'click  .tos a':               'showTOS'
     },
 
     render: function () {
@@ -130,23 +130,48 @@ define([
       $countrySelect.val(country.get('code'));
     },
 
-    populateNetworks: function() {
-      var $select = this.$el.find('#network-select');
-      this.proposedCountry.get('mccMncNetworkList').map(function(lst, i) {
-        $select.append(new Option(
-          lst[0] + ': ' + lst[1] + ' :' + lst[2],
+    populateNetworkNames: function() {
+      var $select = this.$el.find('#network-name-select').html(''),
+        networkNames = [];
+      this.proposedCountry.get('mccMncNetworkList').map(function(lst) {
+        networkNames.indexOf(lst[2]) === -1 && networkNames.push(lst[2]);
+      });
+      networkNames.map(function(networkName) {
+        $select.append(new Option(networkName, networkName))
+      });
+      this.populateNetworks($select.val());
+    },
+
+    populateNetworks: function(networkName) {
+      var $mccMncSelect = this.$el.find('#mcc-mnc-select').html('');
+      this.proposedCountry.get('mccMncNetworkList').map(function(mmn, i) {
+        if (mmn[2] !== networkName) {
+          return;
+        }
+        $mccMncSelect.append(new Option(
+          'Mcc: ' + mmn[0] + ', Mnc: ' + mmn[0],
           i
-        ))
-      })
+        ));
+      });
+      this.setNetworkFromElem($mccMncSelect);
+    },
+
+    setNetworkName: function(evt) {
+      var networkName = $(evt.target).val();
+      this.populateNetworks(networkName);
     },
 
     setNetwork: function(evt) {
-      var networkNumber = $(evt.target).val(),
-        network = this.proposedCountry.get('mccMncNetworkList')[networkNumber],
-        $button = this.$el.find('#network-submit');
+      this.setNetworkFromElem($(evt.target))
+    },
+
+    setNetworkFromElem: function($elem) {
+      var networkNumber = $elem.val(),
+        network = this.proposedCountry.get('mccMncNetworkList')[networkNumber];
+      console.log(networkNumber);
       this.mcc = network[0];
       this.mnc = network[1];
-      $button.removeAttr('disabled');
+      console.log(network);
     },
 
     populateCountryNames: function () {
@@ -191,7 +216,7 @@ define([
       if (this.proposedCountry.hasMccMnc(this.mcc, this.mnc)) {
         this.next('confirmation');
       } else {
-        this.populateNetworks();
+        this.populateNetworkNames();
         this.next('network-prompt');
       }
     },
@@ -207,6 +232,8 @@ define([
     },
 
     networkSelected: function () {
+      console.log('chosen mcc', this.mcc);
+      console.log('chosen mnc', this.mnc);
       this.next('confirmation');
     },
 
