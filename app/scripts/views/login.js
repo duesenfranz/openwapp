@@ -243,8 +243,11 @@ define([
     },
 
     networkSelected: function () {
+      var stringId = 'sameNumberMultiplePhonesWarning',
+        message = global.localisation[global.language][stringId];
       console.log('chosen mcc', this.mcc);
       console.log('chosen mnc', this.mnc);
+      alert(message);
       this.next('confirmation');
     },
 
