@@ -21,8 +21,8 @@ define([
     currentPage: 'init',
 
     initialize: function () {
-      this.mcc = 0;
-      this.mnc = 0;
+      this.mcc = '';
+      this.mnc = '';
       this.possibleMccMncs = []; //only relevant if multiple sims found
       this.proposedCountry = null;
       console.log("K");
@@ -33,15 +33,18 @@ define([
     events: {
       'submit #register':         'gotoConfirmation',
       'submit #register-conf':    'register',
+      'submit #register-network': 'networkSelected',
       'click button':             'goToValidate',
       'click .btn-back':          'back',
       'change #country-select':   'setCountryPrefix',
       'change #sim-select' :      'setSimCard',
+      'change #network-select':   'setNetwork',
       'click  legend':            'showSelect',
       'click  .tos a':            'showTOS'
     },
 
     render: function () {
+      console.log("calling rendering");
       if (global.updateNeeded) {
         console.log('Old app version. Need to update');
         this.$el.html(templates.updateNeeded);
@@ -52,6 +55,7 @@ define([
 
         // No country found
         if (this.mcc === ''|| this.mnc === '') {
+          console.log(this);
           stringId = 'countryNotDetectedOnLogin';
           message = l10n[stringId];
         }
@@ -63,6 +67,7 @@ define([
             country: this.countryTables.getCountryByMccMnc(_this.mcc, _this.mnc)
           });
         }
+        console.log(message);
         var el = this.template({
           countryDetectionMessage: message
         });
@@ -125,6 +130,25 @@ define([
       $countrySelect.val(country.get('code'));
     },
 
+    populateNetworks: function() {
+      var $select = this.$el.find('#network-select');
+      this.proposedCountry.get('mccMncNetworkList').map(function(lst, i) {
+        $select.append(new Option(
+          lst[0] + ': ' + lst[1] + ' :' + lst[2],
+          i
+        ))
+      })
+    },
+
+    setNetwork: function(evt) {
+      var networkNumber = $(evt.target).val(),
+        network = this.proposedCountry.get('mccMncNetworkList')[networkNumber],
+        $button = this.$el.find('#network-submit');
+      this.mcc = network[0];
+      this.mnc = network[1];
+      $button.removeAttr('disabled');
+    },
+
     populateCountryNames: function () {
       var _this = this,
         $select = this.$el.find('#register select').html('');
@@ -149,6 +173,7 @@ define([
       var country = this.countryTables
           .getSelectedCountry($(evt.target).val());
       this.$el.find('legend').html(country.get('prefix'));
+      console.log(country);
       this.proposedCountry = country;
     },
 
@@ -161,14 +186,14 @@ define([
       if (!isValid) {
         return;
       }
-      while (!this.proposedCountry.hasMccMnc(this.mcc, this.mnc)) {
-        // TODO: placeholder code.
-        this.mcc = window.prompt('Please enter your mcc');
-        this.mnc = window.prompt('Please enter your mnc');
-      }
       var $confirmationForm = this.$el.find('#register-conf');
       $confirmationForm.find('input[name=msisdn]').val(phoneParts.number);
-      this.next('confirmation');
+      if (this.proposedCountry.hasMccMnc(this.mcc, this.mnc)) {
+        this.next('confirmation');
+      } else {
+        this.populateNetworks();
+        this.next('network-prompt');
+      }
     },
 
     goToValidate: function (evt) {
@@ -179,6 +204,10 @@ define([
         'validate/' + phoneParts.number + '/' + phoneParts.prefix,
         { trigger: true }
       );
+    },
+
+    networkSelected: function () {
+      this.next('confirmation');
     },
 
     _getPhoneParts: function (pageId) {
