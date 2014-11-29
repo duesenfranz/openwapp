@@ -62,6 +62,9 @@
                   <input type="submit" value="{{translate 'nextButton'}}"
                          id="network-submit">
                 </p>
+                <p>
+                    <button class="btn-back">{{translate 'backButton'}}</button>
+                </p>
             </form>
         </section>
     </div>
@@ -85,7 +88,7 @@
         <p>
 
           <fieldset>
-            <legend class="action">{{translate 'country'}}</legend>
+            <legend>{{translate 'country'}}</legend>
             <input type="tel" name="msisdn"
             placeholder="{{translate 'yourNumberPlaceHolder'}}" required>
           </fieldset>
@@ -95,8 +98,11 @@
         <p>
           <input type="submit" value="{{translate 'acceptButton'}}">
         </p>
-        <p>
-          <button>{{translate 'goToValidateButton'}}</button>
+        <p class="has-two-buttons">
+          <button class="btn-back left">{{translate 'backButton'}}</button>
+            <button id="validate-button" class="right">
+              {{translate 'goToValidateButton'}}
+            </button>
         </p>
       </form>
     </section><!-- main -->

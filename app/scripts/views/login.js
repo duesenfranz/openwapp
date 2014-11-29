@@ -35,13 +35,13 @@ define([
       'submit #register':            'gotoConfirmation',
       'submit #register-conf':       'register',
       'submit #register-network':    'networkSelected',
-      'click button':                'goToValidate',
+      'click #validate-button':      'goToValidate',
       'click .btn-back':             'back',
       'change #country-select':      'setCountryPrefix',
       'change #sim-select' :         'setSimCard',
       'change #network-name-select': 'setNetworkName',
       'change #mcc-mnc-select':      'setNetwork',
-      'click  legend':               'showSelect',
+      'click  .action':              'showSelect',
       'click  .tos a':               'showTOS'
     },
 
