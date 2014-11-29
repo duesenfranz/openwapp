@@ -6,7 +6,7 @@ define([
   var Country = Backbone.Model.extend({
     defaults: function () {
       return {
-        mccMncNetworkList: [],
+        carriers: {},
         code: '',
         name: '',
         prefix: '',
@@ -14,18 +14,39 @@ define([
       };
     },
 
+    addMccMnc: function(mcc, mnc, networkname) {
+      if (this.hasMccMnc(mcc, mnc)) {
+        console.warn('Tried to add network with mcc ' + mcc + ' and mnc ' +
+          mnc + ' multiple times to country ' + this.get('code'))
+      }
+      var networkList = this.get('networkList');
+      if (!networkList.hasOwnProperty(networkname)) {
+        networkList[networkname] = [];
+      }
+      networkList[networkname].push({mcc: mcc, mnc: mnc})
+    },
+
     toString: function () {
       return this.get('name');
     },
 
     hasMccMnc: function(mcc, mnc) {
-      if (this.get('mccMncNetworkList') === undefined) {
-        console.log(this);
-        return false
+      return this.getCarrier(mcc, mnc) != null && true || false
+    },
+
+    getCarrier: function(mcc, mnc) {
+      var carriers = this.get('carriers'),
+        carrierList = Object.keys(carriers),
+        neededCarrierList = carrierList.map(function(carrierName) {
+          return carriers[carrierName].filter(function(mccMnc) {
+            return mccMnc.mcc === mcc && mccMnc.mnc === mnc;
+          }).length > 0
+        });
+      if (neededCarrierList.length === 0) {
+        return null;
+      } else {
+        return neededCarrierList[0]
       }
-      return this.get('mccMncNetworkList').filter(function(mccMncNetwork) {
-        return mcc === mccMncNetwork[0] && mnc === mccMncNetwork[1]
-      }).length > 0
     }
   });
 

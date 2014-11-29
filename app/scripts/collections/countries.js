@@ -27,7 +27,7 @@ define([
 
       //Fill with an empty country
       this.add(new Country({
-        mccMncNetworkList: [],
+        networkList: {},
         code: '',
         name: global.localisation[global.language].country,
         prefix: ''
@@ -42,11 +42,8 @@ define([
         }
 
         parsed.map(function(country) {
-          if (country.mccMncNetworkList === undefined) {
-            throw Error("wtf");
-          }
           _this.add(new Country({
-            mccMncNetworkList: country.mccMncNetworkList,
+            carriers: country.carriers,
             code: country.code,
             name: country.full,
             prefix: country.prefix
@@ -64,12 +61,7 @@ define([
       return result;
     },
 
-    getCountryByMCC: function (mcc) {
-      throw Error("!");
-    },
-
     getCountryByMccMnc: function (mcc, mnc) {
-      console.log("wow");
       //TODO: slow! maybe make a hashmap of concentated mcc and mnc
       return this.find(function (model) {
         return model.hasMccMnc(mcc, mnc);
