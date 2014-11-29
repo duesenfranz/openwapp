@@ -47,7 +47,7 @@ define([
             code: country.code,
             name: country.full,
             prefix: country.prefix
-          }))
+          }));
         });
       } else {
         console.error(xhr.statusText);
@@ -65,7 +65,7 @@ define([
       //TODO: slow! maybe make a hashmap of concentated mcc and mnc
       return this.find(function (model) {
         return model.hasMccMnc(mcc, mnc);
-      })
+      });
     }
   });
 

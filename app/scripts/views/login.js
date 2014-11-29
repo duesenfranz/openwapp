@@ -46,7 +46,6 @@ define([
     },
 
     render: function () {
-      console.log("calling rendering");
       if (global.updateNeeded) {
         console.log('Old app version. Need to update');
         this.$el.html(templates.updateNeeded);
@@ -98,7 +97,7 @@ define([
                 index: index,
                 mcc: network[0],
                 mnc: network[1]
-              }
+              };
           }).
           filter(function(sim) {
           return sim.mcc !== '' && sim.mnc !== '';
@@ -107,7 +106,7 @@ define([
         console.log('Single sim card found', possibleSimCards[0]);
         this.selectedSimCard = possibleSimCards[0];
       } else if (possibleSimCards.length > 1) {
-        console.log('Multiple usable sim cards found', MccMncList);
+        console.log('Multiple usable sim cards found', possibleSimCards);
         this.possibleSimCards = possibleSimCards;
         this.populateSimCards();
       } else {
@@ -141,7 +140,7 @@ define([
       var $select = this.$el.find('#network-name-select').html('');
       Object.keys(this.proposedCountry.get('carriers')).
         map(function(carrierName) {
-          $select.append(new Option(carrierName, carrierName))
+          $select.append(new Option(carrierName, carrierName));
         });
       this.populateNetworks($select.val());
     },
@@ -155,7 +154,7 @@ define([
           $mccMncSelect.append(new Option(
             'MCC: ' + network.mcc + ', MNC: ' + network.mnc,
             index
-          ))
+          ));
         });
       this.setNetworkFromElem($mccMncSelect, networkName);
     },
@@ -169,7 +168,7 @@ define([
       this.setNetworkFromElem(
         $(evt.target),
         this.$el.find('#network-name-select').val()
-      )
+      );
     },
 
     setNetworkFromElem: function($elem, carrier) {
