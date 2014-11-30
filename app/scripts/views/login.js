@@ -28,6 +28,7 @@ define([
       this.selectedSimCard = null;
       this.proposedCountry = null;
       this.countryTables = new CountriesCollection();
+      console.log("got countries");
       this.getMccAndMnc();
     },
 
@@ -75,6 +76,7 @@ define([
         });
         this.$el.html(el);
         this.possibleSimCards.length > 1 && this.populateSimCards();
+        console.log("populating sim cards");
         this.populateCountryNames();
         this.$el.removeClass().addClass('page init');
       }
@@ -84,26 +86,29 @@ define([
       var SimCardList = (
           // < 1.3
           (navigator.mozMobileConnection && [navigator.mozMobileConnection]) ||
-            // >= 1.3
-          navigator.mozMobileConnections ||
+            // >= 1.3; this isn't really an array but an iterable
+          (navigator.mozMobileConnections &&
+            Array.from(navigator.mozMobileConnections))||
             // simulator
           []
-        ),
-        possibleSimCards = SimCardList.
+        );
+      console.log(SimCardList);
+      var possibleSimCards = SimCardList.
           map(function(sim, index) {
+            console.log(sim, index);
             var network = (sim.lastKnownHomeNetwork ||
                            sim.lastKnownNetwork || '-').
-                            split('-').
-                            map(function(i){parseInt(i, 10);});
-              return {
-                index: index,
-                mcc: network[0],
-                mnc: network[1]
-              };
+                            split('-');
+            console.log(network);
+            return {
+              index: index,
+              mcc: network[0],
+              mnc: network[1]
+            };
           }).
           filter(function(sim) {
-          return sim.mcc !== '' && sim.mnc !== '';
-        });
+            return sim.mcc && sim.mnc;
+          });
       if (possibleSimCards.length === 1) {
         console.log('Single sim card found', possibleSimCards[0]);
         this.selectedSimCard = possibleSimCards[0];
@@ -377,7 +382,7 @@ define([
       } else {
         stringId = 'registerErrorGenericAlert';
         message = interpolate(l10n[stringId], {
-          error: JSON.stringify(data)
+          error: JSON.stringify(data, null, ' ')
         });
       }
 
