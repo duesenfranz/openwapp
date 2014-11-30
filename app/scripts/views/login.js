@@ -36,13 +36,15 @@ define([
       'submit #register':            'gotoConfirmation',
       'submit #register-conf':       'register',
       'submit #register-network':    'networkSelected',
-      'click #validate-button':      'goToValidate',
-      'click .icon-back':            'back',
+      'click  #validate-button':     'goToValidate',
+      'click  .icon-back':           'back',
       'change #country-select':      'setCountryPrefix',
       'change #sim-select' :         'setSimCard',
-      'change #network-name-select': 'setNetworkName',
+      'change #carrier-select':      'setNetworkName',
       'change #mcc-mnc-select':      'setNetwork',
-      'click  .action':              'showSelect',
+      'click  #choose-country':      'showSelect',
+      'click  #choose-carrier':      'showCarrierSelect',
+      'click  #choose-mcc-mnc':      'showMccMncSelect',
       'click  .tos a':               'showTOS'
     },
 
@@ -148,7 +150,7 @@ define([
     },
 
     populateNetworkNames: function() {
-      var $select = this.$el.find('#network-name-select').html('');
+      var $select = this.$el.find('#carrier-select').html('');
       Object.keys(this.proposedCountry.get('carriers')).
         map(function(carrierName) {
           $select.append(new Option(carrierName, carrierName));
@@ -172,14 +174,21 @@ define([
 
     setNetworkName: function(evt) {
       var networkName = $(evt.target).val();
+      this.$el.find('#choose-carrier').html(networkName);
       this.populateNetworks(networkName);
     },
 
     setNetwork: function(evt) {
-      this.setNetworkFromElem(
-        $(evt.target),
-        this.$el.find('#network-name-select').val()
+      var mccMncIndex = $(evt.target).val(),
+        carrier = this.$el.find('#carrier-select').val(),
+        network = this.proposedCountry.get('carriers')[carrier][mccMncIndex];
+      this.$el.find('#choose-mcc-mnc').html(
+        'MCC: ' + network.mcc + ', MNC: ' + network.mnc
       );
+      this.$el.find('#network-submit').removeAttr("disabled");
+      console.log('chose mcc/mnc', network.mcc, network.mnc);
+      this.mcc = network.mcc;
+      this.mnc = network.mnc;
     },
 
     setNetworkFromElem: function($elem, carrier) {
@@ -212,11 +221,21 @@ define([
       $select.focus();
     },
 
+    showCarrierSelect: function () {
+      var $select = this.$el.find('#carrier-select');
+      $select.focus();
+    },
+
+    showMccMncSelect: function () {
+      var $select = this.$el.find('#mcc-mnc-select');
+      $select.focus();
+    },
+
     setCountryPrefix: function (evt) {
       evt.preventDefault();
       var country = this.countryTables
           .getSelectedCountry($(evt.target).val());
-      this.$el.find('legend').html(country.get('prefix'));
+      this.$el.find('#choose-country').html(country.get('prefix'));
       console.log(country);
       this.proposedCountry = country;
     },

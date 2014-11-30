@@ -23,7 +23,7 @@
         </p>
         <p>
           <fieldset>
-            <legend class="action">{{translate 'country'}}</legend>
+            <legend class="action" id="choose-country">{{translate 'country'}}</legend>
             <input type="tel" name="msisdn"
             placeholder="{{translate 'yourNumberPlaceHolder'}}" required>
           </fieldset>
@@ -53,16 +53,36 @@
             <p>{{translate 'chooseNetwork'}}</p>
         </section>
         <section class="main">
-            <form id="register-network">
-                <p>
-                  <select id="network-name-select"></select>
+            <form id="register-network" class="default">
+                <p class="hidden">
+                  <select id="carrier-select">
+                      <option value="" selected="selected">
+                        {{translate 'carrier'}}
+                      </option>
+                  </select>
+                  <select id="mcc-mnc-select">
+                      <option value="" selected="selected">
+                        MCC/MNC
+                      </option>
+                  </select>
                 </p>
                 <p>
-                    <select id="mcc-mnc-select"></select>
+                  <fieldset>
+                    <legend class="action" id="choose-carrier">
+                      {{translate 'carrier'}}
+                    </legend>
+                  </fieldset>
+                </p>
+                <p>
+                  <fieldset>
+                    <legend class="action" id="choose-mcc-mnc">
+                      MCC/MNC
+                    </legend>
+                  </fieldset>
                 </p>
                 <p>
                   <input type="submit" value="{{translate 'nextButton'}}"
-                         id="network-submit">
+                         id="network-submit" disabled>
                 </p>
             </form>
         </section>

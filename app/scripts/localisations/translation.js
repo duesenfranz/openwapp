@@ -386,7 +386,8 @@ define([], function () {
       noSimForThisNumber: 'No SIM-Card was detected for this number.',
       chooseNetwork: 'Please choose your carrier and your MMC/MNC number below',
       sameNumberMultiplePhonesWarning: 'Simultaneous usage of the same ' +
-      'mobile number on different devices can lead to unexpected errors.'
+      'mobile number on different devices can lead to unexpected errors.',
+      carrier: 'Carrier'
     },
     pt : {
       all: 'Tudo',
