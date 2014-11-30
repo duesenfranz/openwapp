@@ -19,7 +19,11 @@
     <section class="main">
       <form id="register" class="default">
         <p>
-          <select id="sim-select" class="hidden"></select>
+          <fieldset>
+            <legend class="action hidden" id="choose-sim">
+              {{translate 'simCard'}}
+            </legend>
+          </fieldset>
         </p>
         <p>
           <fieldset>
@@ -35,6 +39,7 @@
           <select id="country-select">
             <option value="" selected="selected">{{translate 'country'}}</option>
           </select>
+          <select id="sim-select"></select>
         </p>
         <p>
           <input type="submit" value="{{translate 'nextButton'}}">

@@ -28,6 +28,8 @@ define([
       this.selectedSimCard = null;
       this.proposedCountry = null;
       this.countryTables = new CountriesCollection();
+      this.countryChooseEnabled = true;
+      this.mccMncChooseEnabled = true;
       console.log("got countries");
       this.getMccAndMnc();
     },
@@ -38,10 +40,11 @@ define([
       'submit #register-network':    'networkSelected',
       'click  #validate-button':     'goToValidate',
       'click  .icon-back':           'back',
-      'blur #country-select':        'setCountryPrefix',
-      'blur #sim-select' :           'setSimCard',
-      'blur #carrier-select':        'setNetworkName',
-      'blur #mcc-mnc-select':        'setNetwork',
+      'blur   #country-select':      'setCountryPrefix',
+      'blur   #sim-select' :         'setSimCard',
+      'blur   #carrier-select':      'setNetworkName',
+      'blur   #mcc-mnc-select':      'setNetwork',
+      'click  #choose-sim':          'showSimSelect',
       'click  #choose-country':      'showSelect',
       'click  #choose-carrier':      'showCarrierSelect',
       'click  #choose-mcc-mnc':      'showMccMncSelect',
@@ -125,8 +128,11 @@ define([
 
     populateSimCards: function () {
       var _this = this,
-        $select = this.$el.find('#sim-select');
-      console.log("select", $select.length);
+        $select = this.$el.find('#sim-select').html(''),
+        $choose = this.$el.find('#choose-sim'),
+        $button = this.$el.find('#register button'),
+        $mobileNumberInput = this.$el.find('#register input'),
+        $prefixChoose = this.$el.find('#choose-country');
       this.possibleSimCards.map(function(sim) {
         var country = _this.countryTables.getCountryByMccMnc(sim.mcc, sim.mnc),
           carrier = country.getCarrier(sim.mcc, sim.mnc);
@@ -134,19 +140,34 @@ define([
           'Slot ' + sim.index + ': ' + carrier, sim.index
         ));
       });
-      console.log("select", $select.length);
-      this.selectedSimCard = this.possibleSimCards[$select.val()];
-      $select.removeClass('hidden');
+      $choose.removeClass('hidden');
+      $button.attr('disabled', true);
+      $mobileNumberInput.attr('disabled', true);
+      $prefixChoose.removeClass('action');
+      this.countryChooseEnabled = false;
     },
 
     setSimCard: function(evt) {
       var simNumber = $(evt.target).val(),
         simCard = this.possibleSimCards[simNumber],
         $countrySelect = this.$el.find('#country-select'),
+        $chooseSim = this.$el.find('#choose-sim'),
         country = this.countryTables.getCountryByMccMnc(
-          simCard.mcc, simCard.mnc);
+          simCard.mcc, simCard.mnc),
+        carrier = country.getCarrier(simCard.mcc, simCard.mnc),
+        $button = this.$el.find('#register button'),
+        $mobileNumberInput = this.$el.find('#register input'),
+        $prefixChoose = this.$el.find('#choose-country');
       this.selectedSimCard = simCard;
+      $chooseSim.html('Slot ' + simNumber + ': ' + carrier);
       $countrySelect.val(country.get('code'));
+      this.setCountryPrefix({target: $countrySelect, preventDefault: String});
+      console.log($countrySelect.length);
+      console.log(country.get('code'));
+      $button.removeAttr('disabled');
+      $mobileNumberInput.removeAttr('disabled');
+      $prefixChoose.addClass('action');
+      this.countryChooseEnabled = true;
     },
 
     populateNetworkNames: function() {
@@ -210,14 +231,22 @@ define([
         $select.append(new Option(country.toString(), country.get('code'),
           true, isSim));
         if (isSim) {
-          _this.$el.find('legend').html(country.get('prefix'));
+          _this.$el.find('.country-prefix').html(country.get('prefix'));
           _this.proposedCountry = country;
         }
       });
     },
 
     showSelect: function () {
+      if (!this.countryChooseEnabled) {
+        return;
+      }
       var $select = this.$el.find('#country-select');
+      $select.focus();
+    },
+
+    showSimSelect: function () {
+      var $select = this.$el.find('#sim-select');
       $select.focus();
     },
 
@@ -227,6 +256,9 @@ define([
     },
 
     showMccMncSelect: function () {
+      if (!this.mccMncChooseEnabled) {
+        return;
+      }
       var $select = this.$el.find('#mcc-mnc-select');
       $select.focus();
     },

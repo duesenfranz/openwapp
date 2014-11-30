@@ -387,7 +387,8 @@ define([], function () {
       chooseNetwork: 'Please choose your carrier and your MMC/MNC number below',
       sameNumberMultiplePhonesWarning: 'Simultaneous usage of the same ' +
       'mobile number on different devices can lead to unexpected errors.',
-      carrier: 'Carrier'
+      carrier: 'Carrier',
+      simCard: 'SIM-Card'
     },
     pt : {
       all: 'Tudo',
