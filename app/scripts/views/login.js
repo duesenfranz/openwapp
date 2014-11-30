@@ -37,7 +37,7 @@ define([
       'submit #register-conf':       'register',
       'submit #register-network':    'networkSelected',
       'click #validate-button':      'goToValidate',
-      'click .btn-back':             'back',
+      'click .icon-back':            'back',
       'change #country-select':      'setCountryPrefix',
       'change #sim-select' :         'setSimCard',
       'change #network-name-select': 'setNetworkName',
