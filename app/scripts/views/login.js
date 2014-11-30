@@ -235,7 +235,8 @@ define([
       evt.preventDefault();
       var country = this.countryTables
           .getSelectedCountry($(evt.target).val());
-      this.$el.find('#choose-country').html(country.get('prefix'));
+      this.$el.find('.country-prefix').html(country.get('prefix'));
+      console.log(this.$el.find('.country-prefix').length);
       console.log(country);
       this.proposedCountry = country;
     },
