@@ -20,6 +20,8 @@ define([
 
     currentPage: 'init',
 
+    /***********************GENERAL*************************************/
+
     initialize: function () {
       console.log('called init');
       this.mcc = '';
@@ -28,8 +30,7 @@ define([
       this.selectedSimCard = null;
       this.proposedCountry = null;
       this.countryTables = new CountriesCollection();
-      this.mccMncChooseEnabled = true;
-      this.getMccAndMnc();
+      this.readSimCards();
       this.elements = {};
     },
 
@@ -123,11 +124,11 @@ define([
       };
     },
 
-    getMccAndMnc: function () {
+    readSimCards: function () {
       /*
        * Reads the sim cards out and populates ``this.possibleSimCards``
        * with a list of {mnc: {mnc}, mcc: {mcc}, slotNr: {slotNr}}
-       * slotNr start at 1
+       * slotNr starts at 1
        */
       var SimCardList = (
           // < 1.3
@@ -157,6 +158,33 @@ define([
       console.log("Possible sim cards", this.possibleSimCards);
     },
 
+    next: function (nextPage) {
+      this.previousPages.push(this.currentPage);
+      this.$el.removeClass().addClass('page').addClass(nextPage);
+      this.currentPage = nextPage;
+    },
+
+    back: function (evt) {
+      evt.preventDefault();
+      var previous = this.previousPages[this.previousPages.length - 1];
+      this.$el.removeClass().addClass('page').addClass(previous);
+      this.currentPage = previous;
+      this.previousPages.pop(this.previousPages.length - 1);
+    },
+
+    /**********************PAGE 1 - INIT********************************/
+
+
+    checkValidRegister: function() {
+      var isValid = this.elements.numberInput.val() && this.proposedCountry;
+      if (isValid) {
+        this.elements.submits.init.removeAttr('disabled');
+      } else {
+        this.elements.submits.init.attr('disabled', true);
+      }
+      return isValid;
+    },
+
     populateSimCards: function () {
       /*
        * Populates the sim card select and disables everything else - the sim
@@ -184,14 +212,20 @@ define([
       this.country.choose.removeClass('action');
     },
 
-    checkValidRegister: function() {
-      var isValid = this.elements.numberInput.val() && this.proposedCountry;
-      if (isValid) {
-        this.elements.submits.init.removeAttr('disabled');
-      } else {
-        this.elements.submits.init.attr('disabled', true);
-      }
-      return isValid;
+    populateCountryNames: function () {
+      var _this = this;
+      this.countryTables.forEach(function (country) {
+        var isSim = _this.selectedSimCard && country.hasMccMnc(
+            _this.selectedSimCard.mcc, _this.selectedSimCard.mnc
+          );
+        _this.elements.country.select.append(
+          new Option(country.toString(), country.get('code'), true, isSim)
+        );
+        if (isSim) {
+          _this.elements.country.choose.html(country.get('prefix'));
+          _this.proposedCountry = country;
+        }
+      });
     },
 
     setSimCard: function(evt) {
@@ -209,6 +243,49 @@ define([
       this.elements.country.choose.addClass('action');
       this.countryChooseEnabled = true;
     },
+
+    setCountryPrefix: function (evt) {
+      evt.preventDefault();
+      var country = this.countryTables
+        .getSelectedCountry($(evt.target).val());
+      this.elements.country.choose.html(country.get('prefix'));
+      this.proposedCountry = country;
+    },
+
+    showCountrySelect: function (evt) {
+      console.log($(evt.target));
+      if (!$(evt.target).hasClass('action')) {
+        return;
+      }
+      this.elements.country.select.focus();
+    },
+
+    gotoConfirmation: function (evt) {
+      evt.preventDefault();
+      var countryCode = this.elements.country.select.val();
+      var phoneParts = this._getPhoneParts();
+
+      var isValid = this._checkPhoneNumber(phoneParts, countryCode);
+      if (!isValid) {
+        return;
+      }
+      var $confirmationForm = this.$el.find('#register-conf');
+      $confirmationForm.find('input[name=msisdn]').val(phoneParts.number);
+      $confirmationForm.find('.country-prefix').html(phoneParts.prefix);
+      if (this.selectedSimCard && this.proposedCountry.hasMccMnc(
+          this.selectedSimCard.mcc, this.selectedSimCard.mnc)) {
+        this.mcc = this.selectedSimCard.mcc;
+        this.mnc = this.selectedSimCard.mnc;
+        console.log('mcc', this.mcc);
+        console.log('mnc', this.mnc);
+        this.next('confirmation');
+      } else {
+        this.populateCarriers();
+        this.next('network-prompt');
+      }
+    },
+
+    /**********************PAGE 2 - NETWORK SELECT - OPTIONAL***********/
 
     populateCarriers: function() {
       /*
@@ -265,30 +342,6 @@ define([
       this.mnc = network.mnc;
     },
 
-    populateCountryNames: function () {
-      var _this = this;
-      this.countryTables.forEach(function (country) {
-        var isSim = _this.selectedSimCard && country.hasMccMnc(
-          _this.selectedSimCard.mcc, _this.selectedSimCard.mnc
-        );
-        _this.elements.country.select.append(
-          new Option(country.toString(), country.get('code'), true, isSim)
-        );
-        if (isSim) {
-          _this.elements.country.choose.html(country.get('prefix'));
-          _this.proposedCountry = country;
-        }
-      });
-    },
-
-    showCountrySelect: function (evt) {
-      console.log($(evt.target));
-      if (!$(evt.target).hasClass('action')) {
-        return;
-      }
-      this.elements.country.select.focus();
-    },
-
     showSimSelect: function () {
       this.elements.sim.select.focus();
     },
@@ -304,39 +357,16 @@ define([
       this.elements.network.select.focus();
     },
 
-    setCountryPrefix: function (evt) {
-      evt.preventDefault();
-      var country = this.countryTables
-          .getSelectedCountry($(evt.target).val());
-      this.elements.country.choose.html(country.get('prefix'));
-      this.proposedCountry = country;
+    networkSelected: function () {
+      var stringId = 'sameNumberMultiplePhonesWarning',
+        message = global.localisation[global.language][stringId];
+      console.log('manually chosen mcc', this.mcc);
+      console.log('manually chosen mnc', this.mnc);
+      window.alert(message);
+      this.next('confirmation');
     },
 
-    gotoConfirmation: function (evt) {
-      evt.preventDefault();
-      var countryCode = this.elements.country.select.val();
-      var phoneParts = this._getPhoneParts();
-
-      var isValid = this._checkPhoneNumber(phoneParts, countryCode);
-      if (!isValid) {
-        return;
-      }
-      //TODO: is this necessary?
-      var $confirmationForm = this.$el.find('#register-conf');
-      $confirmationForm.find('input[name=msisdn]').val(phoneParts.number);
-      $confirmationForm.find('.country-prefix').html(phoneParts.prefix);
-      if (this.selectedSimCard && this.proposedCountry.hasMccMnc(
-          this.selectedSimCard.mcc, this.selectedSimCard.mnc)) {
-        this.mcc = this.selectedSimCard.mcc;
-        this.mnc = this.selectedSimCard.mnc;
-        console.log('mcc', this.mcc);
-        console.log('mnc', this.mnc);
-        this.next('confirmation');
-      } else {
-        this.populateCarriers();
-        this.next('network-prompt');
-      }
-    },
+    /*********************PAGE 3 - CONFIRMATION************************/
 
     goToValidate: function (evt) {
       evt.preventDefault();
@@ -346,15 +376,6 @@ define([
         'validate/' + phoneParts.number + '/' + phoneParts.prefix,
         { trigger: true }
       );
-    },
-
-    networkSelected: function () {
-      var stringId = 'sameNumberMultiplePhonesWarning',
-        message = global.localisation[global.language][stringId];
-      console.log('manually chosen mcc', this.mcc);
-      console.log('manually chosen mnc', this.mnc);
-      window.alert(message);
-      this.next('confirmation');
     },
 
     _getPhoneParts: function (pageId) {
@@ -431,20 +452,6 @@ define([
         }));
       }
       return true;
-    },
-
-    next: function (nextPage) {
-      this.previousPages.push(this.currentPage);
-      this.$el.removeClass().addClass('page').addClass(nextPage);
-      this.currentPage = nextPage;
-    },
-
-    back: function (evt) {
-      evt.preventDefault();
-      var previous = this.previousPages[this.previousPages.length - 1];
-      this.$el.removeClass().addClass('page').addClass(previous);
-      this.currentPage = previous;
-      this.previousPages.pop(this.previousPages.length - 1);
     },
 
     toggleSpinner: function () {
