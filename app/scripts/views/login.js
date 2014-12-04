@@ -165,7 +165,7 @@ define([
           filter(function(sim) {
             return sim.mcc && sim.mnc;
           });
-      console.log("Possible sim cards", this.possibleSimCards);
+      console.log('Possible sim cards', this.possibleSimCards);
     },
 
     next: function (nextPage) {
@@ -303,17 +303,17 @@ define([
       var $select = this.elements.carrier.select,
         l10n = global.localisation[global.language],
         strindId = 'carrier',
-        carrier_translation = l10n[strindId];
+        carrierTranslation = l10n[strindId];
       this.elements.carrier.select.html('');
       Object.keys(this.proposedCountry.get('carriers')).
         map(function(carrierName) {
           $select.append(new Option(carrierName, carrierName));
         });
       this.elements.carrier.choose.html(
-        global.localisation[global.language][carrier_translation]);
+        global.localisation[global.language][carrierTranslation]);
       this.elements.submits.network.attr('disabled', true);
       this.elements.network.choose.removeClass('action');
-      this.elements.network.choose.html('MCC/MNC')
+      this.elements.network.choose.html('MCC/MNC');
     },
 
     populateNetworks: function(carrier) {
@@ -363,10 +363,9 @@ define([
     },
 
     showNetworkSelect: function (evt) {
-      if(!$(evt.target).hasClass('action')) {
-        return
+      if($(evt.target).hasClass('action')) {
+        this.elements.network.select.focus();
       }
-      this.elements.network.select.focus();
     },
 
     networkSelected: function () {
