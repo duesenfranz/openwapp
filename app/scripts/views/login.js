@@ -10,6 +10,7 @@
  * A sim card belongs to a certain network.
  * A network can be uniquely identified by a mcc/mnc combination
  * A carrier consists of one or more networks and has a unique name per country
+ * This means that a country can be identified by a mcc/mnc combination.
  */
 
 
@@ -210,7 +211,7 @@ define([
       var _this = this;
       this.possibleSimCards.map(function(sim, index) {
         var country = _this.countryTables.getCountryByMccMnc(sim.mcc, sim.mnc),
-          carrier = country.getCarrier(sim.mcc, sim.mnc);
+          carrier = country && country.getCarrier(sim.mcc, sim.mnc) || '?';
         _this.elements.sim.select.append(new Option(
           'Slot ' + sim.index + ': ' + carrier, index
         ));
@@ -243,7 +244,8 @@ define([
         simCard = this.possibleSimCards[simNumber],
         country = this.countryTables.getCountryByMccMnc(
           simCard.mcc, simCard.mnc),
-        carrier = country.getCarrier(simCard.mcc, simCard.mnc);
+        carrier = country && country.getCarrier(simCard.mcc, simCard.mnc) ||
+          '?';
       this.selectedSimCard = simCard;
       this.elements.sim.choose.html('Slot ' + simNumber + ': ' + carrier);
       this.elements.country.select.val(country.get('code'));
@@ -273,15 +275,22 @@ define([
       var countryCode = this.elements.country.select.val();
       var phoneParts = this._getPhoneParts();
 
-      var isValid = this._checkPhoneNumber(phoneParts, countryCode);
+      var isValid = this._checkPhoneNumber(phoneParts, countryCode),
+        network_known = this.countryTables.getCountryByMccMnc(
+          this.selectedSimCard.mcc, this.selectedSimCard.mnc);
       if (!isValid) {
         return;
       }
       var $confirmationForm = this.$el.find('#register-conf');
       $confirmationForm.find('input[name=msisdn]').val(phoneParts.number);
       $confirmationForm.find('.country-prefix').html(phoneParts.prefix);
-      if (this.selectedSimCard && this.proposedCountry.hasMccMnc(
-          this.selectedSimCard.mcc, this.selectedSimCard.mnc)) {
+      if (this.selectedSimCard && (
+            network_known ||  // if the mcc/mnc is not known, assume the best
+            this.proposedCountry.hasMccMnc(
+              this.selectedSimCard.mcc, this.selectedSimCard.mnc
+            )
+        )
+      ) {
         this.mcc = this.selectedSimCard.mcc;
         this.mnc = this.selectedSimCard.mnc;
         console.log('mcc', this.mcc);
