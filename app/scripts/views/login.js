@@ -231,14 +231,15 @@ define([
         simCard = this.possibleSimCards[simNumber],
         country = this.countryTables.getCountryByMccMnc(
           simCard.mcc, simCard.mnc),
-        carrier = country && country.getCarrier(simCard.mcc, simCard.mnc) ||
-          '?';
-      this.selectedSimCard = simCard;
+        carrier = '?';
+      if (country) {
+        carrier = country.getCarrier(simCard.mcc, simCard.mnc);
+        this.elements.country.select.val(country.get('code'));
+      }
       this.elements.sim.choose.html('Slot ' + simNumber + ': ' + carrier);
-      this.elements.country.select.val(country.get('code'));
-      //this.setCountryPrefix({target: $countrySelect, preventDefault: String});
-      //TODO: redo
+      this.selectedSimCard = simCard;
       this.elements.numberInput.removeAttr('disabled');
+      this.elements.submits.init.removeAttr('disabled');
       this.elements.country.choose.addClass('action');
     },
 
@@ -257,7 +258,6 @@ define([
       }
       this.elements.country.select.focus();
     },
-
 
     showSimSelect: function () {
       this.elements.sim.select.focus();
@@ -287,7 +287,7 @@ define([
       }
       var $confirmationForm = this.$el.find('#register-conf');
       $confirmationForm.find('input[name=msisdn]').val(phoneParts.number);
-      $confirmationForm.find('.country-prefix').html(phoneParts.prefix);
+      $confirmationForm.find('.country-prefix').html('+' + phoneParts.prefix);
       if (useSelectedSimCard()) {
         this.mcc = this.selectedSimCard.mcc;
         this.mnc = this.selectedSimCard.mnc;
