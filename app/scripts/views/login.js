@@ -59,7 +59,6 @@ define([
       'blur   #sim-select' :         'setSimCard',
       'blur   #carrier-select':      'setCarrier',
       'blur   #mcc-mnc-select':      'setNetwork',
-      'change #number-input':        'checkValidRegister',
       'click  #sim-choose':          'showSimSelect',
       'click  #country-choose':      'showCountrySelect',
       'click  #carrier-choose':      'showCarrierSelect',
@@ -97,7 +96,6 @@ define([
         this.populateElements();
         this.populateCountryNames();
         this.populateSimCards();
-        this.checkValidRegister();
         this.$el.removeClass().addClass('page init');
       }
     },
@@ -185,17 +183,6 @@ define([
 
     /**********************PAGE 1 - INIT********************************/
 
-
-    checkValidRegister: function() {
-      var isValid = this.elements.numberInput.val() && this.proposedCountry;
-      if (isValid) {
-        this.elements.submits.init.removeAttr('disabled');
-      } else {
-        this.elements.submits.init.attr('disabled', true);
-      }
-      return isValid;
-    },
-
     populateSimCards: function () {
       /*
        * Populates the sim card select and disables everything else - the sim
@@ -261,6 +248,7 @@ define([
         .getSelectedCountry($(evt.target).val());
       this.elements.country.choose.html(country.get('prefix'));
       this.proposedCountry = country;
+      this.elements.submits.init.removeAttr('disabled');
     },
 
     showCountrySelect: function (evt) {
@@ -330,8 +318,6 @@ define([
         });
       this.elements.carrier.choose.html(carrierTranslation);
       this.elements.submits.network.attr('disabled', true);
-      this.elements.network.choose.removeClass('action');
-      this.elements.network.choose.html('MCC/MNC');
     },
 
     setCarrier: function(evt) {
