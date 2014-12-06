@@ -29,9 +29,11 @@ define([
         });
       this.add(new_country);
       for (carrier in country.carriers){
-        country.carriers.carrier.map(function(network) {
-          _this.mccMncMap.set(network.mcc + '-' + network.mnc, new_country);
-        })
+        if (country.carriers.hasOwnProperty(carrier)) {
+          country.carriers[carrier].map(function(network) {
+            _this.mccMncMap.set(network.mcc + '-' + network.mnc, new_country);
+          })
+        }
       }
     },
 
@@ -49,7 +51,7 @@ define([
         } catch (e) {
           console.error('Something happened while trying to parse the JSON', e);
         }
-        parsed.map(this.addCountry);
+        parsed.map(this.addCountry, this);
       } else {
         console.error(xhr.statusText);
       }
