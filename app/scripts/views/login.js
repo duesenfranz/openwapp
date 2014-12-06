@@ -328,8 +328,7 @@ define([
         map(function(carrierName) {
           $select.append(new Option(carrierName, carrierName));
         });
-      this.elements.carrier.choose.html(
-        global.localisation[global.language][carrierTranslation]);
+      this.elements.carrier.choose.html(carrierTranslation);
       this.elements.submits.network.attr('disabled', true);
       this.elements.network.choose.removeClass('action');
       this.elements.network.choose.html('MCC/MNC');
