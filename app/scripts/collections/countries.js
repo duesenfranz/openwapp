@@ -18,7 +18,7 @@ define([
       return item.get('name');
     },
 
-    addCountry: function(country) {
+    addCountry: function (country) {
       var carrier,
         _this = this,
         new_country = new Country({
@@ -41,14 +41,6 @@ define([
       var xhr = new XMLHttpRequest();
       xhr.open('GET', '/scripts/countries.json', false); // sync request
       xhr.send(null);
-
-      //Fill with an empty country
-      this.add(new Country({
-        networkList: {},
-        code: '',
-        name: global.localisation[global.language].country,
-        prefix: ''
-      }));
 
       if (xhr.status === 200) {
         var parsed = {};
