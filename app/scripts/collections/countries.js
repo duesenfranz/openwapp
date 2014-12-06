@@ -64,7 +64,7 @@ define([
     },
 
     getCountryByMccMnc: function (mcc, mnc) {
-      return this.get('mccMncMap').get(mcc + '-' + mnc)
+      return this.mccMncMap.get(mcc + '-' + mnc)
     }
   });
 

@@ -79,6 +79,7 @@ define([
           message = l10n[stringId];
         }
         else if (this.possibleSimCards.length === 1) {
+          this.selectedSimCard = this.possibleSimCards[0];
           var interpolate = global.l10nUtils.interpolate;
           stringId = 'countryDetectedOnLogin';
           message = interpolate(l10n[stringId], {
@@ -190,9 +191,6 @@ define([
        * country prefix automatically.
        */
       if (this.possibleSimCards.length < 2) {
-        if (this.possibleSimCards.length === 1) {
-          this.selectedSimCard = this.possibleSimCards[0];
-        }
         return;
       }
       var _this = this;
@@ -200,13 +198,13 @@ define([
         var country = _this.countryTables.getCountryByMccMnc(sim.mcc, sim.mnc),
           carrier = country && country.getCarrier(sim.mcc, sim.mnc) || '?';
         _this.elements.sim.select.append(new Option(
-          'Slot ' + sim.index + ': ' + carrier, index
+          'Slot ' + sim.slotNr + ': ' + carrier, index
         ));
       });
-      this.sim.choose.removeClass('hidden');
-      this.submits.init.attr('disabled', true);
-      this.numberInput.attr('disabled', true);
-      this.country.choose.removeClass('action');
+      this.elements.sim.choose.removeClass('hidden');
+      this.elements.submits.init.attr('disabled', true);
+      this.elements.numberInput.attr('disabled', true);
+      this.elements.country.choose.removeClass('action');
     },
 
     populateCountryNames: function () {
@@ -219,11 +217,10 @@ define([
         _this.elements.country.select.append(
           new Option(country.toString(), country.get('code'), true, isSim)
         );
-        if (isSim) {
-          _this.elements.country.choose.html(country.get('prefix'));
-          _this.proposedCountry = country;
-        }
       });
+      if (_this.selectedSimCard)  {
+        this.setCountryPrefix();
+      }
     },
 
     setSimCard: function(evt) {
@@ -234,19 +231,19 @@ define([
         carrier = '?';
       if (country) {
         carrier = country.getCarrier(simCard.mcc, simCard.mnc);
+        console.log(country.get('code'));
         this.elements.country.select.val(country.get('code'));
+        this.setCountryPrefix();
       }
-      this.elements.sim.choose.html('Slot ' + simNumber + ': ' + carrier);
+      this.elements.sim.choose.html('Slot ' + simCard.slotNr + ': ' + carrier);
       this.selectedSimCard = simCard;
       this.elements.numberInput.removeAttr('disabled');
-      this.elements.submits.init.removeAttr('disabled');
       this.elements.country.choose.addClass('action');
     },
 
-    setCountryPrefix: function (evt) {
-      evt.preventDefault();
-      var country = this.countryTables
-        .getSelectedCountry($(evt.target).val());
+    setCountryPrefix: function () {
+      var code = this.elements.country.select.val(),
+        country = this.countryTables.getSelectedCountry(code);
       this.elements.country.choose.html(country.get('prefix'));
       this.proposedCountry = country;
       this.elements.submits.init.removeAttr('disabled');
