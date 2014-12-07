@@ -273,11 +273,11 @@ define([
           if (!_this.countryTables.getCountryByMccMnc(
               _this.selectedSimCard.mcc, _this.selectedSimCard.mnc
             )) {  // we don't know this sim card at all - assume the best
-            return true
+            return true;
           }
           return _this.proposedCountry.hasMccMnc(
             _this.selectedSimCard.mcc, _this.selectedSimCard.mnc
-          )
+          );
         };
       if (!isValid) {
         return;

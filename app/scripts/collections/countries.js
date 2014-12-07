@@ -3,7 +3,7 @@ define([
   'underscore',
   'utils/country',
   'global'
-], function (Backbone, _, Country, global) {
+], function (Backbone, _, Country) {
   'use strict';
 
   var Countries = Backbone.Collection.extend({
@@ -21,18 +21,19 @@ define([
     addCountry: function (country) {
       var carrier,
         _this = this,
-        new_country = new Country({
+        newCountry = new Country({
           carriers: country.carriers,
           code: country.code,
           name: country.full,
           prefix: country.prefix
-        });
-      this.add(new_country);
+        }),
+        addNetworkToMap = function(network) {
+          _this.mccMncMap.set(network.mcc + '-' + network.mnc, newCountry);
+        };
+      this.add(newCountry);
       for (carrier in country.carriers){
         if (country.carriers.hasOwnProperty(carrier)) {
-          country.carriers[carrier].map(function(network) {
-            _this.mccMncMap.set(network.mcc + '-' + network.mnc, new_country);
-          })
+          country.carriers[carrier].map(addNetworkToMap);
         }
       }
     },
@@ -64,7 +65,7 @@ define([
     },
 
     getCountryByMccMnc: function (mcc, mnc) {
-      return this.mccMncMap.get(mcc + '-' + mnc)
+      return this.mccMncMap.get(mcc + '-' + mnc);
     }
   });
 
