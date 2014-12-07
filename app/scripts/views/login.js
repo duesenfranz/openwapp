@@ -151,7 +151,7 @@ define([
       /* >= 1.3; this isn't really an array but an iterable. Array.from
        * only exists since gecko 32, we support up to gecko 28
        */
-      if (!SimCardList && navigator.mozMobileConnections) {
+      if (!(SimCardList.length) && navigator.mozMobileConnections) {
         for (var i = 0; i < navigator.mozMobileConnections.length; i++) {
           SimCardList.push(navigator.mozMobileConnections[i]);
         }
