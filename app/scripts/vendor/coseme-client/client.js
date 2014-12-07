@@ -623,7 +623,7 @@
             callback(statusCode, null);
           }
 
-          CoSeMe.common.Logger.enableAll();
+
           var seed = CoSeMe.registration
                    .getCode(countryCode, phoneNumber, onReady, onError,
                     origSeed, mcc, mnc, locale);
