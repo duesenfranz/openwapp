@@ -8,6 +8,10 @@ define([
 ], function (Backbone, $, global, templates, PhoneNumber, Language) {
   'use strict';
 
+  var CALL_ME_TIMEOUT = 10; // time until call me button is enabled in seconds
+  var PROGRESSBAR_UPDATE_TIME = 10; // how often to update the progress bar
+                                    // in milliseconds
+
   var Validate = Backbone.View.extend({
 
     el: '#main-page',
@@ -17,11 +21,26 @@ define([
     initialize: function(options) {
       this.phoneNumber = options.phoneNumber;
       this.countryCode = options.countryCode;
+      this.mcc = options.mcc;
+      this.mnc = options.mnc;
     },
 
     render: function () {
-      var internationalNumber;
-      var fullNumber = this.countryCode + this.phoneNumber;
+      var internationalNumber,
+        fullNumber = this.countryCode + this.phoneNumber,
+        _this = this,
+        passed_time = 0,
+        updateTimer = function () {
+          passed_time += PROGRESSBAR_UPDATE_TIME / 1000;
+          if (passed_time < CALL_ME_TIMEOUT) {
+            _this.$el.find('#call-me-progress').attr('value',
+              (passed_time / CALL_ME_TIMEOUT) * 100);
+          } else {
+            window.clearInterval(_this.updateTimerInterval);
+            _this.$el.find('#call-me-progress').attr('value', 100);
+            _this.$el.find('#call-me-button').removeAttr('disabled');
+          }
+        };
       this.$el.removeClass().addClass('page validate');
       try {
         internationalNumber = PhoneNumber.format(fullNumber);
@@ -29,12 +48,16 @@ define([
         internationalNumber = fullNumber;
       }
       this.$el.html(this.template({ phoneNumber: internationalNumber }));
+      this.updateTimerInterval && window.clearInterval(
+        this.updateTimerInterval);
+      this.updateTimerInterval = window.setInterval(
+        updateTimer, PROGRESSBAR_UPDATE_TIME);
     },
 
     events: {
       'submit #validate-form':               'validate',
-      'click button':                        'goToLogin',
-      'click #call-me':                      'callMe',
+      'click #reenter-phone-button':         'goToLogin',
+      'click #call-me-button':               'callMe',
       'keyup input[name=validation-code-1]': 'checkPinInput',
       'keyup input[name=validation-code-2]': 'checkPinInput'
     },
@@ -44,10 +67,28 @@ define([
     callMe: function (evt) {
       evt.preventDefault();
       // TODO: put right locale here
-      var locale = Language.getLanguage().replace(/\-.*$/, '');
-      global.auth.register(this.phoneNumber, locale, function () {
-        // TODO: Implement callback here
-      });
+      var locale = Language.getLanguage().replace(/\-.*$/, ''),
+        _this = this,
+        l10n = global.localisation[global.language];
+      global.auth.register(this.countryCode, this.phoneNumber, locale, this.mcc,
+        this.mnc, 'voice', function(err, details) {
+          if (err) {
+            window.alert(global.auth.getRegisterErrorString(
+              err, details, l10n, global.l10nUtils.interpolate
+            ));
+          } else {
+            var needsValidation = details;
+            if (!needsValidation) {
+              var destination = global.auth.get('screenName') ?
+                'inbox' : 'profile';
+              global.router.navigate(destination, { trigger: true });
+            }
+            else {
+              _this.$el.find('#call-me-button').
+                html(l10n['callRequested']).attr('disabled', 'true');
+            }
+          }
+        });
     },
 
     checkPinInput: function (evt) {

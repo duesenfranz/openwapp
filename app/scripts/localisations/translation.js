@@ -392,7 +392,9 @@ define([], function () {
       sameNumberMultiplePhonesWarning: 'Simultaneous usage of the same ' +
       'mobile number on different devices can lead to unexpected errors.',
       carrier: 'Carrier',
-      simCard: 'SIM-Card'
+      simCard: 'SIM-Card',
+      callMe: 'Call me!',
+      callRequested: 'Call requested...'
     },
     pt : {
       all: 'Tudo',
@@ -1155,7 +1157,9 @@ define([], function () {
       'gleichen SIM-Karte auf unterschiedlichen Geräten kann es zu ' +
       'unerwarteten Fehlern kommen.',
       carrier: 'Betreiber',
-      simCard: 'SIM-Karte'
+      simCard: 'SIM-Karte',
+      callMe: 'Anruf anfordern',
+      callRequested: 'Anruf angefordert...'
     },
     nl: {
       all: 'Alle',
@@ -1182,8 +1186,6 @@ define([], function () {
       movilNumberValidationAlert: 'Het mobiele nummer:\n' +
       '+{{prefix}} {{number}}\nlijkt niet een geldig nummer te zijn binnen ' +
       '{{country}}.\nWilt u toch verder gaan?',
-      registerErrorGenericAlert: 'Er was een fout bij het registreren van uw ' +
-      'nummer\n Probeer het a.u.b. later nog eens.',
       registerErrorTooRecent: 'U probeert te snel een nieuwe regisratiecode ' +
       'te verkrijgen.\nControleer of u de bevestiging echt nog niet heeft ' +
       'ontvangen. Is dat toch het geval, wacht minstens {{minutes}} om ' +

@@ -607,7 +607,8 @@
           methods.call(methodName, [jid]);
         },
 
-        register: function(countryCode, phoneNumber, locale, mcc, mnc, callback) {
+        register: function(countryCode, phoneNumber, locale, mcc, mnc, method,
+                           callback) {
           var origSeed = getSeed();
 
           function onReady(response) {
@@ -626,7 +627,7 @@
 
           var seed = CoSeMe.registration
                    .getCode(countryCode, phoneNumber, onReady, onError,
-                    origSeed, mcc, mnc, locale);
+                    origSeed, mcc, mnc, locale, method);
 
           if (origSeed === null) {
             saveSeed(seed);

@@ -30,7 +30,11 @@
           <input type="submit" value="{{translate 'nextButton'}}" disabled>
         </p>
         <p>
-          <button>{{translate 'reEnterPhone'}}</button>
+            <button id="call-me-button" disabled>{{translate 'callMe'}}</button>
+            <progress value="0" max="100" id="call-me-progress"></progress>
+        </p>
+        <p>
+          <button id="reenter-phone-button">{{translate 'reEnterPhone'}}</button>
         </p>
         <!--<p>
           <button id="call-me">{{translate 'validateCodeCall'}}</button>

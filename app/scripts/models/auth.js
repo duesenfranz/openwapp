@@ -126,11 +126,46 @@ define([
       }, this.RETRY_TIME);
     },
 
-    register: function (countryCode, phoneNumber, locale, mcc, mnc, callback) {
+    getRegisterErrorString: function (err, data, l10n, interpolate) {
+      var stringId;
+      switch (err) {
+        case 'too_recent':
+              /*jshint -W069*/
+              /*Justification: camelCase/dotstyle conflict*/
+              var tryAfter = (data && data['retry_after']) || 0;
+              stringId = 'registerErrorTooRecent';
+              return interpolate(l10n[stringId], {
+                minutes: Math.ceil(tryAfter / 60)
+              });
+        case 'too_many':
+              stringId = 'registerErrorTooMany';
+              break;
+        case 'old_version':
+        case 'bad_token':
+              stringId = 'registerErrorOldVersion';
+              break;
+        case 'stale':
+              stringId = 'registerErrorStale';
+              break;
+        case 'no_routes':
+              stringId = 'registerErrorNoRoutes';
+              break;
+        default :
+              stringId = 'registerErrorGenericAlert';
+              return interpolate(l10n[stringId], {
+                error: JSON.stringify(data, null, ' ')
+              });
+      }
+      return l10n[stringId];
+    },
+
+    register: function (countryCode, phoneNumber, locale, mcc, mnc,
+                        method, callback) {
       var _this = this;
       global.client
         .register(
-          countryCode, phoneNumber, locale, mcc, mnc, function (err, response) {
+          countryCode, phoneNumber, locale, mcc, mnc, method,
+          function (err, response) {
             if (err) {
               return callback(err, response);
             }

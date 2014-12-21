@@ -78,7 +78,7 @@ define([
       'settings':  'settings',
       'profile':   'userProfile',
       'new-group': 'newGroup',
-      'validate/:phoneNumber/:countryCode(/:section)': 'validate',
+      'validate/:phoneNumber/:countryCode/:mcc/:mnc(/:section)': 'validate',
       'viewer/location/:conversationId/:messageId(/:scroll)': 'locationViewer',
       'conversation/:conversationId/profile':  'profile',
       'conversation/:conversationId/sendlocation':  'sendLocation',
@@ -98,10 +98,12 @@ define([
       this.show(new LoginView());
     },
 
-    validate: function (phoneNumber, countryCode) {
+    validate: function (phoneNumber, countryCode, mcc, mnc) {
       this.show(new ValidateView({
         phoneNumber: phoneNumber,
-        countryCode: countryCode
+        countryCode: countryCode,
+        mcc: mcc,
+        mnc: mnc
       }));
     },
 

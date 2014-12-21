@@ -382,10 +382,14 @@ define([
       phoneNumber = phoneNumber.replace(/[^\d]/g, '');
       global.auth
       .register(countryCode, phoneNumber, 'es-ES', _this.mcc, _this.mnc,
-        function (err, details) {
+        'sms', function (err, details) {
           _this.toggleSpinner();
           if (err) {
-            return _this.errorRegister(err, details);
+            window.alert(global.auth.getRegisterErrorString(
+              err, details, global.localisation[global.language],
+              global.l10nUtils.interpolate
+            ));
+            return;
           }
           var needsValidation = details;
           if (!needsValidation) {
@@ -397,7 +401,8 @@ define([
             localStorage.setItem('isPinSent', 'true');
             localStorage.setItem('phoneAndCC', phoneNumber + '/' + countryCode);
             global.router.navigate(
-              'validate/' + phoneNumber + '/' + countryCode,
+              'validate/' + phoneNumber + '/' + countryCode + '/' + _this.mcc +
+              '/' + _this.mnc,
               { trigger: true }
             );
           }
@@ -437,40 +442,6 @@ define([
       this.$el.find('.spinner').toggle();
       var button = this.$el.find('input[type=submit]');
       button.prop('disabled', !button.prop('disabled'));
-    },
-
-    errorRegister: function (err, data) {
-      var l10n = global.localisation[global.language];
-      var interpolate = global.l10nUtils.interpolate;
-      var stringId, message;
-      this.$el.find('section.intro > p').show();
-      if (err === 'too_recent') {
-        /*jshint -W069*/
-        /*Justification: camelCase/dotstyle conflict*/
-        var tryAfter = (data && data['retry_after']) || 0;
-        stringId = 'registerErrorTooRecent';
-        message = interpolate(l10n[stringId], {
-          minutes: Math.ceil(tryAfter / 60)
-        });
-      } else if (err === 'too_many') {
-        stringId = 'registerErrorTooMany';
-      } else if (err === 'old_version' || err === 'bad_token') {
-        stringId = 'registerErrorOldVersion';
-      } else if (err === 'stale') {
-        stringId = 'registerErrorStale';
-      } else if (err === 'no_routes') {
-        stringId = 'registerErrorNoRoutes';
-      } else {
-        stringId = 'registerErrorGenericAlert';
-        message = interpolate(l10n[stringId], {
-          error: JSON.stringify(data, null, ' ')
-        });
-      }
-
-      if (!message) {
-        message = l10n[stringId];
-      }
-      window.alert(message);
     }
   });
 
