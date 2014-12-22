@@ -402,6 +402,7 @@ define([
               _this.mcc + '/' + _this.mnc;
             localStorage.setItem('isPinSent', 'true');
             localStorage.setItem('phoneDetails', phoneDetails);
+            localStorage.setItem('smsSendTime', (new Date()).getTime());
             global.router.navigate(
               'validate/' + phoneDetails,
               { trigger: true }

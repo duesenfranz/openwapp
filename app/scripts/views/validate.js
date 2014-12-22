@@ -8,7 +8,8 @@ define([
 ], function (Backbone, $, global, templates, PhoneNumber, Language) {
   'use strict';
 
-  var CALL_ME_TIMEOUT = 10; // time until call me button is enabled in seconds
+  var CALL_ME_TIMEOUT = 10 * 1000; // time until call me button is enabled
+                                       // in milliseconds
   var PROGRESSBAR_UPDATE_TIME = 10; // how often to update the progress bar
                                     // in milliseconds
 
@@ -29,12 +30,13 @@ define([
       var internationalNumber,
         fullNumber = this.countryCode + this.phoneNumber,
         _this = this,
-        passed_time = 0,
+        startTime = parseInt(localStorage.getItem('smsSendTime') || '0', 10),
         updateTimer = function () {
-          passed_time += PROGRESSBAR_UPDATE_TIME / 1000;
-          if (passed_time < CALL_ME_TIMEOUT) {
-            _this.$el.find('#call-me-progress').attr('value',
-              (passed_time / CALL_ME_TIMEOUT) * 100);
+          var currentTime = (new Date()).getTime(),
+            passedTime = currentTime - startTime,
+            passedPercent = passedTime / CALL_ME_TIMEOUT * 100;
+          if (passedPercent < 100) {
+            _this.$el.find('#call-me-progress').attr('value', passedPercent);
           } else {
             window.clearInterval(_this.updateTimerInterval);
             _this.$el.find('#call-me-progress').attr('value', 100);
@@ -52,6 +54,7 @@ define([
         this.updateTimerInterval);
       this.updateTimerInterval = window.setInterval(
         updateTimer, PROGRESSBAR_UPDATE_TIME);
+      updateTimer(); //startTime may be way off
     },
 
     events: {
