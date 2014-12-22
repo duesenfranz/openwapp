@@ -403,6 +403,7 @@ define([
             localStorage.setItem('isPinSent', 'true');
             localStorage.setItem('phoneDetails', phoneDetails);
             localStorage.setItem('smsSendTime', (new Date()).getTime());
+            localStorage.setItem('smsSendTime', (new Date()).getTime());
             global.router.navigate(
               'validate/' + phoneDetails,
               { trigger: true }

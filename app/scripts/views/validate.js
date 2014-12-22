@@ -8,7 +8,7 @@ define([
 ], function (Backbone, $, global, templates, PhoneNumber, Language) {
   'use strict';
 
-  var CALL_ME_TIMEOUT = 10 * 1000; // time until call me button is enabled
+  var CALL_ME_TIMEOUT = 3 * 60 * 1000; // time until call me button is enabled
                                        // in milliseconds
   var PROGRESSBAR_UPDATE_TIME = 10; // how often to update the progress bar
                                     // in milliseconds
@@ -50,8 +50,8 @@ define([
         internationalNumber = fullNumber;
       }
       this.$el.html(this.template({ phoneNumber: internationalNumber }));
-      this.updateTimerInterval && window.clearInterval(
-        this.updateTimerInterval);
+
+      window.clearInterval(this.updateTimerInterval);
       this.updateTimerInterval = window.setInterval(
         updateTimer, PROGRESSBAR_UPDATE_TIME);
       updateTimer(); //startTime may be way off
@@ -87,8 +87,9 @@ define([
               global.router.navigate(destination, { trigger: true });
             }
             else {
+              var stringId = 'callRequested';
               _this.$el.find('#call-me-button').
-                html(l10n['callRequested']).attr('disabled', 'true');
+                html(l10n[stringId]).attr('disabled', 'true');
             }
           }
         });
