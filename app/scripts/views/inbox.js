@@ -145,7 +145,7 @@ define([
 
     _goToValidate: function () {
       global.router.navigate(
-        'validate/' + localStorage.getItem('phoneAndCC'), { trigger: true });
+        'validate/' + localStorage.getItem('phoneDetails'), { trigger: true });
     },
 
     _goToLogin: function () {

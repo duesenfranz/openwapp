@@ -398,11 +398,12 @@ define([
             global.router.navigate(destination, { trigger: true });
           }
           else {
+            var phoneDetails = phoneNumber + '/' + countryCode + '/' +
+              _this.mcc + '/' + _this.mnc;
             localStorage.setItem('isPinSent', 'true');
-            localStorage.setItem('phoneAndCC', phoneNumber + '/' + countryCode);
+            localStorage.setItem('phoneDetails', phoneDetails);
             global.router.navigate(
-              'validate/' + phoneNumber + '/' + countryCode + '/' + _this.mcc +
-              '/' + _this.mnc,
+              'validate/' + phoneDetails,
               { trigger: true }
             );
           }
