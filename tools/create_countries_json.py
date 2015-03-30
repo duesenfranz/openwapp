@@ -8,7 +8,7 @@
 # and should contain a header line
 # The json-file will contain list of countries as follows
 #[
-#    { 
+#    {
 #        "carriers": {
 #            "{carrier_name}": [
 #                {"mcc": "{mcc}", "mnc": "{mnc}"},
@@ -17,7 +17,7 @@
 #        }
 #        "code": "{country_code}",
 #        "full": "{country_name}",
-#        "prefix": "{country_prefix}"   
+#        "prefix": "{country_prefix}"
 #   },
 #   ---------next country------
 #]
@@ -70,5 +70,9 @@ print("networks with one mccmnc: {}; with more mccmnc: {}".format(
     networks_with_more_mccmnc
 ))
 with open('countries.json', 'w') as jsonfile:
-    jsonfile.write(json.dumps(list(countries.values()), sort_keys=True, indent=4, separators=(',', ': ')))
+    jsonfile.write(json.dumps(
+      sorted(list(countries.values()), key= lambda x: x["full"]),
+      sort_keys=True,
+      indent=4,
+      separators=(',', ': ')))
 
